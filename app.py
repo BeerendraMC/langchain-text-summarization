@@ -5,14 +5,13 @@ from langchain.prompts import PromptTemplate
 from langchain_community.document_loaders import UnstructuredURLLoader, YoutubeLoader
 from langchain_groq import ChatGroq
 
-## sstreamlit APP
+## streamlit APP
 st.set_page_config(page_title="Summarize Text From YouTube or Website", page_icon="💥")
 st.title("Summarize Text From YouTube or Website")
 st.markdown("Crafted with ❤️ by [Beerendra](https://github.com/beerendramc)")
 st.subheader("Summarize URL")
 
-
-## Get the Groq API Key and url(YT or website)to be summarized
+## Get the Groq API Key and url(YT or website) to be summarized
 with st.sidebar:
     groq_api_key = st.text_input("Groq API Key", value="", type="password")
 
@@ -27,11 +26,13 @@ prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
 
 if st.button("Submit"):
     ## Validate all the inputs
-    if not groq_api_key.strip() or not generic_url.strip():
-        st.error("Please provide the information to get started")
+    if not groq_api_key.strip():
+        st.error("Please provide Groq API Key in the Sidebar")
+    elif not generic_url.strip():
+        st.error("Please provide the URL to be summarized")
     elif not validators.url(generic_url):
         st.error(
-            "Please enter a valid Url. It can may be a YT video utl or website url"
+            "Please enter a valid Url. It can be a YouTube video url or website url"
         )
     else:
         try:
@@ -55,8 +56,8 @@ if st.button("Submit"):
 
                 ## Chain For Summarization
                 chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
-                output_summary = chain.run(docs)
+                output_summary = chain.invoke(docs)
 
-                st.success(output_summary)
+                st.success(output_summary["output_text"])
         except Exception as e:
             st.exception(f"Exception:{e}")
